@@ -27,7 +27,7 @@ public class ItemService implements BaseItemService {
 
     @Override
     public ItemDto createItem(long userId, ItemDto itemDto) {
-        User user = userService.getUser(userId);
+        User user = userService.getUserById(userId);
         Item item = itemRepository.createItem(userId, ItemMapper.mapToItem(itemDto, userId));
         return ItemMapper.mapToDto(item);
     }

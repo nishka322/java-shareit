@@ -14,7 +14,6 @@ import java.util.*;
 @Qualifier("inMemoryRepo")
 public class InMemoryUserRepository implements UserRepository {
     private final Map<Long, User> usersStorage = new HashMap<>();
-
     private long maxId = 0;
 
     @Override
@@ -57,7 +56,30 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public void removeUser(long id) {
+        if (!usersStorage.containsKey(id)) {
+            throw new NotFoundException("User with id = " + id + " not found.");
+        }
         usersStorage.remove(id);
+        log.info("User with id {} was removed", id);
+    }
+
+    public List<User> findAll() {
+        return new ArrayList<>(usersStorage.values());
+    }
+
+    public boolean existsById(long id) {
+        return usersStorage.containsKey(id);
+    }
+
+    public boolean existsByEmail(String email) {
+        return usersStorage.values().stream()
+                .anyMatch(user -> user.getEmail().equals(email));
+    }
+
+    public Optional<User> findByEmail(String email) {
+        return usersStorage.values().stream()
+                .filter(user -> user.getEmail().equals(email))
+                .findFirst();
     }
 
     private long generateId() {
@@ -65,10 +87,9 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     private void checkEmail(String email) {
-        List<User> users = usersStorage.values().stream().filter(u -> u.getEmail().equals(email)).toList();
-        if (!users.isEmpty()) {
-            log.warn("Try to add new user with existing email");
-            throw new AlreadyExistsException("Email already exist.");
+        if (existsByEmail(email)) {
+            log.warn("Try to add new user with existing email: {}", email);
+            throw new AlreadyExistsException("Email already exist: " + email);
         }
     }
 }
