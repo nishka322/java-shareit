@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exceptions.AlreadyExistsException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -35,11 +34,6 @@ public class UserService implements BaseUserService {
         log.info("Обновление пользователя с ID: {}", userId);
 
         User existingUser = getUserById(userId);
-
-        if (userUpdates.getEmail() != null &&
-                !userUpdates.getEmail().equals(existingUser.getEmail())) {
-            checkEmailUniqueness(userUpdates.getEmail());
-        }
 
         User updatedUser = prepareUpdatedUser(existingUser, userUpdates);
 
@@ -87,14 +81,6 @@ public class UserService implements BaseUserService {
 
     private boolean isValidEmail(String email) {
         return email == null || !email.contains("@");
-    }
-
-    private void checkEmailUniqueness(String email) {
-        try {
-        } catch (AlreadyExistsException e) {
-            throw new IllegalArgumentException(
-                    String.format("Пользователь с email %s уже существует", email), e);
-        }
     }
 
     private User prepareUpdatedUser(User existingUser, User updates) {
