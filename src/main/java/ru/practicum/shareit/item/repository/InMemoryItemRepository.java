@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,16 +19,18 @@ public class InMemoryItemRepository implements ItemRepository {
     private long maxId = 0;
 
     @Override
-    public Item createItem(long userId, Item item) {
+    public Item createItem(User owner, Item item) {
         item.setId(generateId());
-        item.setOwnerId(userId);
+        item.setOwner(owner);
         itemsRepository.put(item.getId(), item);
         return item;
     }
 
     @Override
     public List<Item> getAllUserItems(long userId) {
-        return itemsRepository.values().stream().filter(i -> i.getOwnerId() == userId).toList();
+        return itemsRepository.values().stream()
+                .filter(i -> i.getOwner() != null && i.getOwner().getId() == userId)
+                .toList();
     }
 
     @Override

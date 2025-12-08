@@ -5,9 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.constants.Constants;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.service.ItemServiceImpl;
 
 import java.util.List;
 
@@ -19,17 +18,20 @@ import java.util.List;
 @RequestMapping("/items")
 @RequiredArgsConstructor
 public class ItemController {
-    private final ItemService itemService;
+    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
+
+    private final ItemServiceImpl itemService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemDto addItem(@RequestHeader(Constants.USER_ID_HEADER) Long userId, @Valid @RequestBody ItemDto itemDto) {
+    public ItemDto addItem(@RequestHeader(USER_ID_HEADER) Long userId,
+                           @Valid @RequestBody ItemDto itemDto) {
         log.info("Post new item. Item is {}, owner id is {}", itemDto.getName(), userId);
         return itemService.createItem(userId, itemDto);
     }
 
     @GetMapping
-    public List<ItemDto> getAllUserItems(@RequestHeader(Constants.USER_ID_HEADER) Long userId) {
+    public List<ItemDto> getAllUserItems(@RequestHeader(USER_ID_HEADER) Long userId) {
         log.info("Getting all items for user with id = {}", userId);
         return itemService.getAllUserItems(userId);
     }
@@ -41,8 +43,11 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto editItem(@RequestHeader(Constants.USER_ID_HEADER) Long userId, @RequestBody ItemDto itemDto, @PathVariable long itemId) {
-        log.info("Edit {}, owner id is {}", itemDto.getName(), userId);
+    public ItemDto editItem(@RequestHeader(USER_ID_HEADER) Long userId,
+                            @RequestBody ItemDto itemDto,
+                            @PathVariable long itemId) {
+        log.info("Edit item with id {}, owner id is {}", itemId, userId);
+        itemDto.setId(itemId);
         return itemService.editItem(userId, itemDto, itemId);
     }
 
@@ -51,6 +56,4 @@ public class ItemController {
         log.info("Getting items by request: {}", text);
         return itemService.search(text);
     }
-
-
 }
