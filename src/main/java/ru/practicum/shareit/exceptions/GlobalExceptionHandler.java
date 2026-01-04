@@ -32,4 +32,11 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleNotFound(final NotFoundException e) {
         return new ErrorResponse("Candidates not found.", e.getMessage());
     }
+
+    @ExceptionHandler(WrongRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorResponse handleWrongRequest(final WrongRequestException e) {
+        return new ErrorResponse("Wrong request data.",e.getMessage());
+    }
 }

@@ -29,6 +29,9 @@ public class InMemoryUserRepository implements UserRepository {
     @Override
     public User editUser(User user, long userId) {
         User oldUser = usersStorage.get(userId);
+        if (oldUser == null) {
+            throw new NotFoundException("User not found");
+        }
 
         if (user.getEmail() == null) {
             user.setEmail(oldUser.getEmail());
@@ -63,19 +66,23 @@ public class InMemoryUserRepository implements UserRepository {
         log.info("User with id {} was removed", id);
     }
 
+    @Override
     public List<User> findAll() {
         return new ArrayList<>(usersStorage.values());
     }
 
+    @Override
     public boolean existsById(long id) {
         return usersStorage.containsKey(id);
     }
 
+    @Override
     public boolean existsByEmail(String email) {
         return usersStorage.values().stream()
                 .anyMatch(user -> user.getEmail().equals(email));
     }
 
+    @Override
     public Optional<User> findByEmail(String email) {
         return usersStorage.values().stream()
                 .filter(user -> user.getEmail().equals(email))

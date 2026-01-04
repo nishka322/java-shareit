@@ -1,45 +1,47 @@
 package ru.practicum.shareit.user.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.BaseUserService;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.service.UserService;
 
-import java.util.List;
+/**
+ * TODO Sprint add-controllers.
+ */
 
+@Slf4j
 @RestController
-@RequestMapping("/users")
+@RequestMapping(path = "/users")
 @RequiredArgsConstructor
 public class UserController {
-
-    private final BaseUserService userService;
+    private final UserService userService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public User createUser(@RequestBody User user) {
+    public UserDto createUser(@Valid @RequestBody UserDto user) {
+        log.info("Creating new user");
         return userService.createUser(user);
     }
 
     @PatchMapping("/{userId}")
-    public User updateUser(@PathVariable Long userId,
-                           @RequestBody User user) {
+    public UserDto editUser(@RequestBody UserDto user, @PathVariable long userId) {
+        log.info("Updating user under id {}", userId);
         return userService.updateUser(userId, user);
     }
 
     @GetMapping("/{userId}")
-    public User getUserById(@PathVariable Long userId) {
+    public UserDto getUser(@PathVariable long userId) {
+        log.info("Getting user by id = {}", userId);
         return userService.getUserById(userId);
     }
 
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
-    }
-
     @DeleteMapping("/{userId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable Long userId) {
+    public void removeUser(@PathVariable long userId) {
+        log.info("Remove user by id = {}", userId);
         userService.deleteUser(userId);
     }
+
 }

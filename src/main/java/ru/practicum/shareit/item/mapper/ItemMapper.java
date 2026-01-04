@@ -1,32 +1,32 @@
 package ru.practicum.shareit.item.mapper;
 
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import ru.practicum.shareit.booking.dto.BookingDateDto;
+import ru.practicum.shareit.item.dto.comment.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemWithCommentAndBookingDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
-@Component
-public class ItemMapper {
-    public static ItemDto mapToDto(Item item) {
-        return ItemDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.isAvailable())
-                .build();
-    }
+import java.util.List;
 
-    public static Item mapToItem(ItemDto dto, User owner) {
-        Item item = new Item();
-        item.setId(dto.getId());
-        item.setName(dto.getName());
-        item.setDescription(dto.getDescription());
-        item.setAvailable(dto.getAvailable());
-        item.setOwner(owner);
-        return item;
-    }
+@Mapper(componentModel = "spring")
+public interface ItemMapper {
+    ItemDto mapToDto(Item item);
 
-    public static Item updateItem(Item item, ItemDto dto) {
+    List<ItemDto> mapItemsToItemDtos(List<Item> items);
+
+    Item mapToItem(ItemDto dto);
+
+
+    @Mapping(target = "lastBooking", source = "lastBooking")
+    @Mapping(target = "nextBooking", source = "nextBooking")
+    @Mapping(target = "id", source = "item.id")
+    @Mapping(target = "comments", source = "comments")
+    ItemWithCommentAndBookingDto mapItemToItemWithBooking(Item item, BookingDateDto lastBooking, BookingDateDto nextBooking, List<CommentResponseDto> comments);
+
+
+    default Item updateItem(Item item, ItemDto dto) {
         if (dto.getName() != null && !dto.getName().isBlank()) {
             item.setName(dto.getName());
         }
@@ -40,4 +40,5 @@ public class ItemMapper {
         }
         return item;
     }
+
 }

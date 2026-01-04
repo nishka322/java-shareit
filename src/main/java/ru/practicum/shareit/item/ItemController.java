@@ -6,13 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemWithCommentAndBookingDto;
+import ru.practicum.shareit.item.dto.comment.CommentResponseDto;
+import ru.practicum.shareit.item.dto.comment.NewCommentDto;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
 
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Slf4j
 @RestController
 @RequestMapping("/items")
@@ -31,15 +31,16 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getAllUserItems(@RequestHeader(USER_ID_HEADER) Long userId) {
+    public List<ItemWithCommentAndBookingDto> getAllUserItems(@RequestHeader(USER_ID_HEADER) Long userId) {
         log.info("Getting all items for user with id = {}", userId);
         return itemService.getAllUserItems(userId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable Long itemId) {
-        log.info("Getting information about item with id = {}", itemId);
-        return itemService.getItemById(itemId);
+    public ItemWithCommentAndBookingDto getItem(@RequestHeader(USER_ID_HEADER) Long userId,
+                                                @PathVariable Long itemId) {
+        log.info("Getting information about item with id = {} for user {}", itemId, userId);
+        return itemService.getItemWithCommentById(userId, itemId);
     }
 
     @PatchMapping("/{itemId}")
@@ -55,5 +56,13 @@ public class ItemController {
     public List<ItemDto> searchItems(@RequestParam("text") String text) {
         log.info("Getting items by request: {}", text);
         return itemService.search(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentResponseDto addComment(@RequestHeader(USER_ID_HEADER) Long userId,
+                                         @PathVariable Long itemId,
+                                         @Valid @RequestBody NewCommentDto commentDto) {
+        log.info("Adding comment to item {} by user {}", itemId, userId);
+        return itemService.addComment(userId, itemId, commentDto);
     }
 }
