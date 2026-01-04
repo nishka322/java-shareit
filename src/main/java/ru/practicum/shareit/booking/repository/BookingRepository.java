@@ -20,4 +20,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByOwnerId(@Param("userId") long userId);
 
     List<Booking> findByItemId(long itemId);
+
+    @Query("SELECT COUNT(b) > 0 FROM Booking b " +
+            "WHERE b.booker.id = :userId " +
+            "AND b.item.id = :itemId " +
+            "AND b.status = ru.practicum.shareit.booking.model.BookingStatus.APPROVED " +
+            "AND b.end < CURRENT_TIMESTAMP")
+    boolean hasUserBookedItem(@Param("userId") Long userId,
+                              @Param("itemId") Long itemId);
 }

@@ -45,11 +45,6 @@ public interface DbUserRepository extends JpaRepository<User, Long>, UserReposit
     }
 
     @Override
-    default List<User> findAll() {
-        return findAll();
-    }
-
-    @Override
     default boolean existsById(long id) {
         return findById(id).isPresent();
     }

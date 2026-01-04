@@ -187,13 +187,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void checkUserHasBooking(long userId, long itemId) {
-        List<Booking> bookings = bookingRepository.findByBookerId(userId).stream()
-                .filter(b -> b.getItem().getId() == itemId
-                        && b.getStatus() == BookingStatus.APPROVED
-                        && b.getEnd().isBefore(LocalDateTime.now()))
-                .toList();
-
-        if (bookings.isEmpty()) {
+        if (!bookingRepository.hasUserBookedItem(userId, itemId)) {
             throw new WrongRequestException("Пользователь, который еще не пользовался предметом, не может оставить на него отзыв.");
         }
     }
