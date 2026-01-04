@@ -1,6 +1,5 @@
 package ru.practicum.shareit.user.model;
 
-import jakarta.validation.Valid;
 import lombok.Data;
 
 /**
@@ -8,7 +7,6 @@ import lombok.Data;
  */
 
 @Data
-@Valid
 public class User {
     private long id;
 
