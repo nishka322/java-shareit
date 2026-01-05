@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.repository;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -8,28 +9,14 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
+@Primary
 @Qualifier("DbItemRepo")
-public interface DbItemRepository extends JpaRepository<Item, Long>, ItemRepository {
-    @Override
-    default Item saveItem(Item item) {
-        return save(item);
-    }
+public interface DbItemRepository extends JpaRepository<Item, Long> {
 
-    @Override
     List<Item> findByOwnerId(long userId);
 
-    @Override
-    Optional<Item> findById(Long id);
-
-    @Override
-    default Item editItem(Item item) {
-        return save(item);
-    }
-
-    @Override
     @Query("""
             SELECT i
             FROM Item i

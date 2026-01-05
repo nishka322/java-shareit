@@ -1,14 +1,7 @@
 package ru.practicum.shareit.item.model;
 
-
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
-
-/**
- * TODO Sprint add-controllers.
- */
 
 @Getter
 @Setter
@@ -24,13 +17,13 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotNull
-    @NotBlank
+    @Column(nullable = false)
     private String name;
 
     private String description;
 
     private boolean available = true;
 
+    @Column(nullable = false)
     private long ownerId;
 }

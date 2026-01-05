@@ -15,10 +15,8 @@ import java.util.List;
 @Valid
 public class ItemWithCommentAndBookingDto {
     private long id;
-    @NotNull
     @NotBlank
     private String name;
-    @NotNull
     @NotBlank
     private String description;
     @NotNull
@@ -27,5 +25,4 @@ public class ItemWithCommentAndBookingDto {
     private BookingDateDto lastBooking;
     private BookingDateDto nextBooking;
     List<CommentResponseDto> comments;
-
 }

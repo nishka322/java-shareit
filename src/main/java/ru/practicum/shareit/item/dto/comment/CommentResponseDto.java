@@ -17,10 +17,8 @@ import java.time.LocalDateTime;
 @Data
 public class CommentResponseDto {
     private long id;
-    @NotNull
     @NotBlank
     private String text;
-    @NotNull
     @NotBlank
     private String authorName;
     @NotNull

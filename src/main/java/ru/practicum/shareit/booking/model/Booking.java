@@ -1,23 +1,15 @@
 package ru.practicum.shareit.booking.model;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
-/**
- * TODO Sprint add-bookings.
- */
-
 @Getter
 @Setter
-@EqualsAndHashCode
-@ToString
 @Entity
 @Table(name = "booking")
 public class Booking {
@@ -35,6 +27,7 @@ public class Booking {
 
     @Column(name = "start_time", columnDefinition = "TIMESTAMP", nullable = false)
     private LocalDateTime start;
+
     @Column(name = "end_time", columnDefinition = "TIMESTAMP", nullable = false)
     private LocalDateTime end;
 

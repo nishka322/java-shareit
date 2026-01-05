@@ -8,10 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
-/**
- * TODO Sprint add-controllers.
- */
-
 @Slf4j
 @RestController
 @RequestMapping(path = "/users")
@@ -43,5 +39,4 @@ public class UserController {
         log.info("Remove user by id = {}", userId);
         userService.deleteUser(userId);
     }
-
 }

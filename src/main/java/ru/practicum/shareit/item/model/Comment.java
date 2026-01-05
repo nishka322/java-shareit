@@ -1,8 +1,6 @@
 package ru.practicum.shareit.item.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import ru.practicum.shareit.user.model.User;
 
@@ -22,21 +20,17 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @NotNull
-    @NotBlank
+    @Column(nullable = false, length = 500)
     private String text;
 
-    @NotNull
-    @Column(name = "created", columnDefinition = "TIMESTAMP")
+    @Column(name = "created", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime created;
 }

@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDateDto;
@@ -20,22 +21,19 @@ import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
-import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.repository.DbItemRepository;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class ItemServiceImpl implements ItemService {
 
-    private final ItemRepository itemRepository;
+    private final DbItemRepository itemRepository;
     private final UserService userService;
     private final ItemMapper itemMapper;
     private final UserMapper userMapper;
@@ -44,9 +42,13 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final BookingMapper bookingMapper;
 
-    public ItemServiceImpl(@Qualifier("DbItemRepo") ItemRepository itemRepository, UserService userService,
-                           ItemMapper itemMapper, UserMapper userMapper, CommentMapper commentMapper,
-                           CommentRepository commentRepository, BookingRepository bookingRepository,
+    public ItemServiceImpl(@Qualifier("DbItemRepo") DbItemRepository itemRepository,
+                           UserService userService,
+                           ItemMapper itemMapper,
+                           UserMapper userMapper,
+                           CommentMapper commentMapper,
+                           CommentRepository commentRepository,
+                           BookingRepository bookingRepository,
                            BookingMapper bookingMapper) {
         this.itemRepository = itemRepository;
         this.userService = userService;
@@ -72,7 +74,7 @@ public class ItemServiceImpl implements ItemService {
             item.setOwnerId(userId);
             log.debug("Set ownerId: {}", userId);
 
-            Item savedItem = itemRepository.saveItem(item);
+            Item savedItem = itemRepository.save(item);
             log.debug("Saved item with id: {}", savedItem.getId());
 
             ItemDto result = itemMapper.mapToDto(savedItem);
@@ -104,7 +106,7 @@ public class ItemServiceImpl implements ItemService {
         }
 
         Item newItem = itemMapper.updateItem(oldItem, itemDto);
-        return itemMapper.mapToDto(itemRepository.editItem(newItem));
+        return itemMapper.mapToDto(itemRepository.save(newItem));
     }
 
     @Override
@@ -139,23 +141,64 @@ public class ItemServiceImpl implements ItemService {
         userService.getUserById(userId);
 
         List<Item> items = itemRepository.findByOwnerId(userId);
-        List<Comment> comments = commentRepository.findAllByItemOwnerId(userId);
+        if (items.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Comment> comments = commentRepository.findByItemIn(items, Sort.by(Sort.Direction.DESC, "created"));
+
+        List<Booking> bookings = bookingRepository.findByItemInAndStatus(
+                items,
+                BookingStatus.APPROVED,
+                Sort.by(Sort.Direction.DESC, "start")
+        );
+
+        Map<Item, List<Comment>> commentsByItem = comments.stream()
+                .collect(Collectors.groupingBy(Comment::getItem));
+
+        Map<Item, List<Booking>> bookingsByItem = bookings.stream()
+                .collect(Collectors.groupingBy(Booking::getItem));
 
         return items.stream()
                 .map(item -> {
-                    List<Booking> itemBookings = bookingRepository.findByItemId(item.getId());
+                    List<Booking> itemBookings = bookingsByItem.getOrDefault(item, Collections.emptyList());
 
-                    List<BookingDateDto> lastNextBooking = getLastNextBooking(itemBookings);
+                    BookingDateDto lastBooking = null;
+                    BookingDateDto nextBooking = null;
 
-                    List<CommentResponseDto> itemComments = comments.stream()
-                            .filter(c -> c.getItem().getId() == item.getId())
+                    LocalDateTime now = LocalDateTime.now();
+
+                    List<Booking> pastBookings = itemBookings.stream()
+                            .filter(b -> !b.getStart().isAfter(now))
+                            .toList();
+
+                    if (!pastBookings.isEmpty()) {
+                        Booking last = pastBookings.stream()
+                                .max(Comparator.comparing(Booking::getStart))
+                                .orElse(null);
+                        lastBooking = bookingMapper.mapBookingToDateDto(last);
+                    }
+
+                    List<Booking> futureBookings = itemBookings.stream()
+                            .filter(b -> b.getStart().isAfter(now))
+                            .toList();
+
+                    if (!futureBookings.isEmpty()) {
+                        Booking next = futureBookings.stream()
+                                .min(Comparator.comparing(Booking::getStart))
+                                .orElse(null);
+                        nextBooking = bookingMapper.mapBookingToDateDto(next);
+                    }
+
+                    List<CommentResponseDto> itemComments = commentsByItem.getOrDefault(item, Collections.emptyList())
+                            .stream()
                             .map(commentMapper::mapCommentToResponse)
                             .collect(Collectors.toList());
 
                     return itemMapper.mapItemToItemWithBooking(
                             item,
-                            lastNextBooking.get(0),
-                            lastNextBooking.get(1),
+                            lastBooking,
+                            nextBooking,
                             itemComments
                     );
                 })

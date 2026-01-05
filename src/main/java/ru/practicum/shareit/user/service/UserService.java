@@ -1,13 +1,12 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.repository.DbUserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,11 +16,11 @@ import java.util.stream.Collectors;
 @Service
 public class UserService implements BaseUserService {
 
-    private final UserRepository userRepository;
+    private final DbUserRepository userRepository;
     private final UserMapper userMapper;
 
-    public UserService(@Qualifier("dbRepo") UserRepository userRepository, UserMapper userMapper) {
-        this.userRepository = userRepository;
+    public UserService(DbUserRepository dbUserRepository, UserMapper userMapper) {
+        this.userRepository = dbUserRepository;
         this.userMapper = userMapper;
     }
 
@@ -32,7 +31,7 @@ public class UserService implements BaseUserService {
         validateUser(userDto);
         checkEmailExists(userDto.getEmail());
         User user = userMapper.toEntity(userDto);
-        User createdUser = userRepository.createUser(user);
+        User createdUser = userRepository.save(user);
 
         log.info("Пользователь создан с ID: {}", createdUser.getId());
         return userMapper.toDto(createdUser);
@@ -42,14 +41,15 @@ public class UserService implements BaseUserService {
     public UserDto updateUser(Long userId, UserDto userUpdates) {
         log.info("Обновление пользователя с ID: {}", userId);
 
-        User existingUser = userRepository.getUser(userId);
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         if (userUpdates.getName() != null && !userUpdates.getName().trim().isEmpty()) {
             existingUser.setName(userUpdates.getName());
         }
 
         if (userUpdates.getEmail() != null && !userUpdates.getEmail().trim().isEmpty()) {
-            if (!isValidEmail(userUpdates.getEmail())) {
+            if (isValidEmail(userUpdates.getEmail())) {
                 throw new IllegalArgumentException("Некорректный формат email");
             }
 
@@ -60,7 +60,7 @@ public class UserService implements BaseUserService {
             existingUser.setEmail(userUpdates.getEmail());
         }
 
-        User updatedUser = userRepository.editUser(existingUser, userId);
+        User updatedUser = userRepository.save(existingUser);
         log.info("Пользователь с ID: {} успешно обновлен", userId);
         return userMapper.toDto(updatedUser);
     }
@@ -68,14 +68,16 @@ public class UserService implements BaseUserService {
     @Override
     public UserDto getUserById(Long userId) {
         log.info("Получение пользователя с ID: {}", userId);
-        User user = userRepository.getUser(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
         return userMapper.toDto(user);
     }
 
     @Override
     public User getUserEntityById(Long userId) {
         log.info("Получение сущности пользователя с ID: {}", userId);
-        return userRepository.getUser(userId);
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
     }
 
     @Override
@@ -91,19 +93,16 @@ public class UserService implements BaseUserService {
     public void deleteUser(Long userId) {
         log.info("Удаление пользователя с ID: {}", userId);
 
-        userRepository.getUser(userId);
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User not found");
+        }
 
-        userRepository.removeUser(userId);
+        userRepository.deleteById(userId);
         log.info("Пользователь с ID: {} успешно удален", userId);
     }
 
     public Optional<User> findById(Long userId) {
-        try {
-            User user = userRepository.getUser(userId);
-            return Optional.of(user);
-        } catch (NotFoundException e) {
-            return Optional.empty();
-        }
+        return userRepository.findById(userId);
     }
 
     private void validateUser(UserDto user) {
@@ -111,7 +110,7 @@ public class UserService implements BaseUserService {
             throw new IllegalArgumentException("Email пользователя не может быть пустым");
         }
 
-        if (!isValidEmail(user.getEmail())) {
+        if (isValidEmail(user.getEmail())) {
             throw new IllegalArgumentException("Некорректный формат email");
         }
 
@@ -121,11 +120,11 @@ public class UserService implements BaseUserService {
     }
 
     private boolean isValidEmail(String email) {
-        return email != null && email.contains("@");
+        return email == null || !email.contains("@");
     }
 
     private void checkEmailExists(String email) {
-        if (userRepository.existsByEmail(email)) {
+        if (userRepository.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException("Пользователь с email " + email + " уже существует");
         }
     }
