@@ -8,8 +8,7 @@ import ru.practicum.shareit.user.model.User;
 import java.util.Optional;
 
 @Repository
-@Qualifier("dbUserRepository")
-public interface DbUserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 }

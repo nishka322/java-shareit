@@ -6,7 +6,7 @@ import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.DbUserRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 @Service
 public class UserService implements BaseUserService {
 
-    private final DbUserRepository userRepository;
+    private final UserRepository userRepository;
     private final UserMapper userMapper;
 
-    public UserService(DbUserRepository dbUserRepository, UserMapper userMapper) {
+    public UserService(UserRepository dbUserRepository, UserMapper userMapper) {
         this.userRepository = dbUserRepository;
         this.userMapper = userMapper;
     }

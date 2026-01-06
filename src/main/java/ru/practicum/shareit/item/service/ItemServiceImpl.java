@@ -21,7 +21,7 @@ import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
-import ru.practicum.shareit.item.repository.DbItemRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @Service
 public class ItemServiceImpl implements ItemService {
 
-    private final DbItemRepository itemRepository;
+    private final ItemRepository itemRepository;
     private final UserService userService;
     private final ItemMapper itemMapper;
     private final UserMapper userMapper;
@@ -42,7 +42,7 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final BookingMapper bookingMapper;
 
-    public ItemServiceImpl(@Qualifier("DbItemRepo") DbItemRepository itemRepository,
+    public ItemServiceImpl(ItemRepository itemRepository,
                            UserService userService,
                            ItemMapper itemMapper,
                            UserMapper userMapper,

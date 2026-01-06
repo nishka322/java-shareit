@@ -14,7 +14,7 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.WrongRequestException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.DbItemRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -32,7 +32,7 @@ public class BookingServiceImpl implements BookingService {
     private final ItemService itemService;
     private final BookingMapper mapper;
     private final UserMapper userMapper;
-    private final DbItemRepository itemRepository;
+    private final ItemRepository itemRepository;
 
     @Override
     public BookingResponseDto makeBooking(@Valid BookingRequestDto dto, long userId) {
@@ -102,7 +102,6 @@ public class BookingServiceImpl implements BookingService {
                     bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(), LocalDateTime.now(), newestFirst);
             case WAITING -> bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.WAITING, newestFirst);
             case REJECTED -> bookingRepository.findByBookerIdAndStatus(userId, BookingStatus.REJECTED, newestFirst);
-            default -> throw new WrongRequestException("Unknown state: " + state);
         };
 
         return bookings.stream()
@@ -116,8 +115,13 @@ public class BookingServiceImpl implements BookingService {
         userService.getUserById(userId);
 
         Sort newestFirst = Sort.by(Sort.Direction.DESC, "start");
+        LocalDateTime now = LocalDateTime.now();
+
         List<Booking> bookings = switch (state) {
             case ALL -> bookingRepository.findAllByOwnerId(userId);
+            case CURRENT -> bookingRepository.findCurrentByOwner(userId, now, newestFirst);
+            case PAST -> bookingRepository.findPastByOwner(userId, now, BookingStatus.APPROVED, newestFirst);
+            case FUTURE -> bookingRepository.findFutureByOwner(userId, now, newestFirst);
             case WAITING -> bookingRepository.findByItemInAndStatus(
                     itemRepository.findByOwnerId(userId),
                     BookingStatus.WAITING,
@@ -128,7 +132,6 @@ public class BookingServiceImpl implements BookingService {
                     BookingStatus.REJECTED,
                     newestFirst
             );
-            default -> throw new WrongRequestException("Unknown state: " + state);
         };
 
         return bookings.stream()
