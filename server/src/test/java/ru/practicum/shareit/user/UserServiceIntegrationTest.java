@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.practicum.shareit.exceptions.AlreadyExistsException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -167,7 +168,7 @@ class UserServiceIntegrationTest {
                 .email("same@example.com")
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> userService.createUser(user2));
+        assertThrows(AlreadyExistsException.class, () -> userService.createUser(user2));
     }
 
     @Test
@@ -188,7 +189,7 @@ class UserServiceIntegrationTest {
                 .email("user2@example.com")
                 .build();
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(AlreadyExistsException.class,
                 () -> userService.updateUser(createdUser1.getId(), updates));
     }
 
