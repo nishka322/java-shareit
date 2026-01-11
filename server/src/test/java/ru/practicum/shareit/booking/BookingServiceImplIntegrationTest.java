@@ -220,7 +220,7 @@ class BookingServiceImplIntegrationTest {
 
         assertNotNull(bookings);
         assertEquals(1, bookings.size());
-        assertEquals(item.getId(), bookings.get(0).getItem().getId());
+        assertEquals(item.getId(), bookings.getFirst().getItem().getId());
     }
 
     @Test

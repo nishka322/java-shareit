@@ -104,7 +104,7 @@ class ItemRequestServiceImplIntegrationTest {
 
         assertNotNull(allRequestsForRequestor);
         assertEquals(1, allRequestsForRequestor.size());
-        assertEquals("Other user's request", allRequestsForRequestor.get(0).getDescription());
+        assertEquals("Other user's request", allRequestsForRequestor.getFirst().getDescription());
     }
 
     @Test

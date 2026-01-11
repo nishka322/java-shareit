@@ -299,4 +299,123 @@ class ItemMapperTest {
         assertNull(dto.getNextBooking());
         assertTrue(dto.getComments().isEmpty());
     }
+
+    // null
+
+    @Test
+    void shouldReturnNullWhenMapToDtoWithNullItem() {
+        ItemDto result = mapper.mapToDto(null);
+        assertNull(result);
+    }
+
+    @Test
+    void shouldReturnNullWhenMapToItemWithNullDto() {
+        Item result = mapper.mapToItem(null);
+        assertNull(result);
+    }
+
+    @Test
+    void shouldReturnNullWhenMapItemsToItemDtosWithNullList() {
+        List<ItemDto> result = mapper.mapItemsToItemDtos(null);
+        assertNull(result);
+    }
+
+    @Test
+    void shouldReturnNullWhenMapItemToItemWithBookingWithAllNulls() {
+        ItemWithCommentAndBookingDto result = mapper.mapItemToItemWithBooking(
+                null, null, null, null
+        );
+        assertNull(result);
+    }
+
+    @Test
+    void shouldMapItemToItemWithBookingWhenOnlyItemProvided() {
+        Item item = Item.builder()
+                .id(1L)
+                .name("Item")
+                .description("Description")
+                .available(true)
+                .build();
+
+        ItemWithCommentAndBookingDto result = mapper.mapItemToItemWithBooking(
+                item, null, null, null
+        );
+
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals("Item", result.getName());
+        assertEquals("Description", result.getDescription());
+        assertTrue(result.getAvailable());
+        assertNull(result.getLastBooking());
+        assertNull(result.getNextBooking());
+        assertNull(result.getComments());
+    }
+
+    @Test
+    void itemRequestIdShouldReturnNullWhenItemIsNull() {
+        ItemDto dto = mapper.mapToDto(null);
+        assertNull(dto);
+    }
+
+    @Test
+    void itemRequestIdShouldReturnNullWhenRequestIsNull() {
+        Item item = Item.builder()
+                .id(1L)
+                .name("Item")
+                .request(null)
+                .build();
+
+        ItemDto dto = mapper.mapToDto(item);
+        assertNotNull(dto);
+        assertNull(dto.getRequestId());
+    }
+
+    @Test
+    void itemRequestIdShouldReturnNullWhenRequestIdIsNull() {
+        ItemRequest request = new ItemRequest();
+        request.setId(null);
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("Item")
+                .request(request)
+                .build();
+
+        ItemDto dto = mapper.mapToDto(item);
+        assertNotNull(dto);
+        assertNull(dto.getRequestId());
+    }
+
+    @Test
+    void shouldUpdateItemWhenDtoIsNull() {
+        Item item = Item.builder()
+                .name("Old")
+                .description("Old desc")
+                .available(true)
+                .build();
+
+        ItemDto emptyDto = ItemDto.builder().build();
+        Item updated = mapper.updateItem(item, emptyDto);
+
+        assertEquals("Old", updated.getName());
+        assertEquals("Old desc", updated.getDescription());
+        assertTrue(updated.isAvailable());
+    }
+
+    @Test
+    void shouldUpdateItemWhenDtoHasNullFields() {
+        Item item = Item.builder()
+                .name("Old")
+                .description("Old desc")
+                .available(true)
+                .build();
+
+        ItemDto dto = ItemDto.builder().build();
+
+        Item updated = mapper.updateItem(item, dto);
+
+        assertEquals("Old", updated.getName());
+        assertEquals("Old desc", updated.getDescription());
+        assertTrue(updated.isAvailable());
+    }
 }

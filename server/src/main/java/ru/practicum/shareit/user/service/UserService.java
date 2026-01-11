@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exceptions.AlreadyExistsException;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -125,7 +126,7 @@ public class UserService implements BaseUserService {
 
     private void checkEmailExists(String email) {
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new IllegalArgumentException("Пользователь с email " + email + " уже существует");
+            throw new AlreadyExistsException("Пользователь с email " + email + " уже существует");
         }
     }
 }

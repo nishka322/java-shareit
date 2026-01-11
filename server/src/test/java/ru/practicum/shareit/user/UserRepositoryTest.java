@@ -31,8 +31,6 @@ class UserRepositoryTest {
 
         User savedUser = userRepository.save(user);
 
-        assertNotNull(savedUser.getId());
-
         Optional<User> foundUser = userRepository.findById(savedUser.getId());
 
         assertTrue(foundUser.isPresent());

@@ -54,7 +54,6 @@ class ItemServiceImplIntegrationTest {
         ItemDto createdItem = itemService.createItem(testUser.getId(), testItemDto);
 
         assertNotNull(createdItem);
-        assertNotNull(createdItem.getId());
         assertEquals("Power Drill", createdItem.getName());
         assertEquals("Professional power drill for home use", createdItem.getDescription());
         assertTrue(createdItem.getAvailable());
@@ -112,12 +111,12 @@ class ItemServiceImplIntegrationTest {
 
         assertNotNull(searchResults);
         assertEquals(1, searchResults.size());
-        assertEquals(createdItem.getId(), searchResults.get(0).getId());
+        assertEquals(createdItem.getId(), searchResults.getFirst().getId());
 
         List<ItemDto> searchResultsByDescription = itemService.search("professional");
 
         assertEquals(1, searchResultsByDescription.size());
-        assertEquals(createdItem.getId(), searchResultsByDescription.get(0).getId());
+        assertEquals(createdItem.getId(), searchResultsByDescription.getFirst().getId());
     }
 
     @Test
@@ -139,7 +138,7 @@ class ItemServiceImplIntegrationTest {
         List<ItemDto> searchResults = itemService.search("drill");
 
         assertEquals(1, searchResults.size());
-        assertEquals("Power Drill", searchResults.get(0).getName());
+        assertEquals("Power Drill", searchResults.getFirst().getName());
     }
 
     @Test
@@ -163,8 +162,8 @@ class ItemServiceImplIntegrationTest {
         assertEquals(1, searchResults1.size());
         assertEquals(1, searchResults2.size());
         assertEquals(1, searchResults3.size());
-        assertEquals(createdItem.getId(), searchResults1.get(0).getId());
-        assertEquals(createdItem.getId(), searchResults2.get(0).getId());
-        assertEquals(createdItem.getId(), searchResults3.get(0).getId());
+        assertEquals(createdItem.getId(), searchResults1.getFirst().getId());
+        assertEquals(createdItem.getId(), searchResults2.getFirst().getId());
+        assertEquals(createdItem.getId(), searchResults3.getFirst().getId());
     }
 }

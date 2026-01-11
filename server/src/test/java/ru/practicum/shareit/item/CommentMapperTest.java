@@ -85,4 +85,79 @@ class CommentMapperTest {
         assertEquals("Test comment", dto.getText());
         assertNull(dto.getAuthorName());
     }
+
+    // null
+
+    @Test
+    void shouldHandleNullDtoInMapNewCommentToComment() {
+        User user = new User();
+        Item item = new Item();
+        LocalDateTime created = LocalDateTime.now();
+
+        Comment result = mapper.mapNewCommentToComment(null, user, item, created);
+
+        assertNotNull(result);
+        assertNull(result.getText());
+        assertEquals(user, result.getUser());
+        assertEquals(item, result.getItem());
+        assertEquals(created, result.getCreated());
+    }
+
+    @Test
+    void shouldReturnNullWhenMapCommentToResponseWithNullComment() {
+        CommentResponseDto result = mapper.mapCommentToResponse(null);
+        assertNull(result);
+    }
+
+    @Test
+    void shouldMapNewCommentToCommentWhenUserIsNull() {
+        NewCommentDto dto = new NewCommentDto("Test");
+        Item item = new Item();
+        LocalDateTime created = LocalDateTime.now();
+
+        Comment result = mapper.mapNewCommentToComment(dto, null, item, created);
+        assertNotNull(result);
+        assertEquals("Test", result.getText());
+        assertNull(result.getUser());
+        assertEquals(item, result.getItem());
+        assertEquals(created, result.getCreated());
+    }
+
+    @Test
+    void shouldMapNewCommentToCommentWhenItemIsNull() {
+        NewCommentDto dto = new NewCommentDto("Test");
+        User user = new User();
+        LocalDateTime created = LocalDateTime.now();
+
+        Comment result = mapper.mapNewCommentToComment(dto, user, null, created);
+        assertNotNull(result);
+        assertEquals("Test", result.getText());
+        assertEquals(user, result.getUser());
+        assertNull(result.getItem());
+        assertEquals(created, result.getCreated());
+    }
+
+    @Test
+    void shouldMapNewCommentToCommentWhenCreatedIsNull() {
+        NewCommentDto dto = new NewCommentDto("Test");
+        User user = new User();
+        Item item = new Item();
+
+        Comment result = mapper.mapNewCommentToComment(dto, user, item, null);
+        assertNotNull(result);
+        assertEquals("Test", result.getText());
+        assertEquals(user, result.getUser());
+        assertEquals(item, result.getItem());
+        assertNull(result.getCreated());
+    }
+
+    @Test
+    void commentUserNameShouldReturnNullWhenUserIsNull() {
+        Comment comment = new Comment();
+        comment.setUser(null);
+
+        CommentResponseDto dto = mapper.mapCommentToResponse(comment);
+        assertNotNull(dto);
+        assertNull(dto.getAuthorName());
+    }
 }
