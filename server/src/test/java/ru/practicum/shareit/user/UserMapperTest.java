@@ -61,7 +61,7 @@ class UserMapperTest {
         User entity = mapper.toEntity(dto);
 
         assertNotNull(entity);
-        assertEquals(0L, entity.getId()); // default value for long
+        assertEquals(0L, entity.getId());
         assertEquals("New User", entity.getName());
         assertEquals("new.user@example.com", entity.getEmail());
     }

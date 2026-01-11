@@ -75,6 +75,6 @@ class CommentResponseDtoJsonTest {
 
         String expectedDate = now.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         assertThat(result).extractingJsonPathStringValue("$.created")
-                .startsWith(expectedDate.substring(0, 16)); // Проверяем до минут
+                .startsWith(expectedDate.substring(0, 16));
     }
 }

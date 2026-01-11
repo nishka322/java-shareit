@@ -60,7 +60,7 @@ class ItemRequestServiceImplIntegrationTest {
         assertNotNull(created.getId());
         assertEquals("Need a power drill", created.getDescription());
         assertNotNull(created.getCreated());
-        assertNull(created.getItems()); // items не заполняются при создании
+        assertNull(created.getItems());
 
         ItemRequest persisted = itemRequestRepository.findById(created.getId()).orElse(null);
         assertNotNull(persisted);
@@ -80,7 +80,7 @@ class ItemRequestServiceImplIntegrationTest {
 
         assertNotNull(ownRequests);
         assertEquals(2, ownRequests.size());
-        assertEquals("Need a hammer", ownRequests.get(0).getDescription()); // sorted by created desc
+        assertEquals("Need a hammer", ownRequests.get(0).getDescription());
         assertEquals("Need a drill", ownRequests.get(1).getDescription());
     }
 
@@ -137,6 +137,6 @@ class ItemRequestServiceImplIntegrationTest {
 
         assertNotNull(found);
         assertNotNull(found.getItems());
-        assertTrue(found.getItems().isEmpty()); // No items attached yet
+        assertTrue(found.getItems().isEmpty());
     }
 }

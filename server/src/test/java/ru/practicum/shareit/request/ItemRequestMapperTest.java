@@ -40,7 +40,7 @@ class ItemRequestMapperTest {
         assertEquals(10L, dto.getId());
         assertEquals("Need a drill", dto.getDescription());
         assertEquals(LocalDateTime.of(2024, 1, 15, 10, 30, 0), dto.getCreated());
-        assertNull(dto.getItems()); // items игнорируются
+        assertNull(dto.getItems());
     }
 
     @Test
@@ -54,11 +54,11 @@ class ItemRequestMapperTest {
         ItemRequest entity = mapper.toEntity(dto);
 
         assertNotNull(entity);
-        assertNull(entity.getId()); // id игнорируется
+        assertNull(entity.getId());
         assertEquals("Need a hammer", entity.getDescription());
-        assertNull(entity.getRequestor()); // requestor игнорируется
-        assertNull(entity.getCreated()); // created игнорируется
-        assertNull(entity.getItems()); // items игнорируется
+        assertNull(entity.getRequestor());
+        assertNull(entity.getCreated());
+        assertNull(entity.getItems());
     }
 
     @Test

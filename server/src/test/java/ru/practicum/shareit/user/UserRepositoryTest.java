@@ -115,8 +115,6 @@ class UserRepositoryTest {
         entityManager.persist(user1);
         entityManager.flush();
 
-        // При попытке сохранить второго пользователя с таким же email
-        // должно выброситься исключение ConstraintViolationException
         assertThrows(Exception.class, () -> {
             entityManager.persist(user2);
             entityManager.flush();
