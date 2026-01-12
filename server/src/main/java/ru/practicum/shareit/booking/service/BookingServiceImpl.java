@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking.service;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -35,7 +34,7 @@ public class BookingServiceImpl implements BookingService {
     private final ItemRepository itemRepository;
 
     @Override
-    public BookingResponseDto makeBooking(@Valid BookingRequestDto dto, long userId) {
+    public BookingResponseDto makeBooking(BookingRequestDto dto, long userId) {
         UserDto userDto = userService.getUserById(userId);
 
         Item item = itemService.getItemEntityById(dto.getItemId());

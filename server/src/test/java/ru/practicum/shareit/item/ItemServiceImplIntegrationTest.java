@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ class ItemServiceImplIntegrationTest {
     private ItemServiceImpl itemService;
 
     @Autowired
-    private UserRepository userRepository;
+    private EntityManager entityManager;
 
     @Autowired
     private ItemRepository itemRepository;
@@ -35,12 +35,12 @@ class ItemServiceImplIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        testUser = userRepository.save(
-                User.builder()
-                        .name("Test User")
-                        .email("test.user@email.com")
-                        .build()
-        );
+        testUser = User.builder()
+                .name("Test User")
+                .email("test.user@email.com")
+                .build();
+        entityManager.persist(testUser);
+        entityManager.flush();
 
         testItemDto = ItemDto.builder()
                 .name("Power Drill")

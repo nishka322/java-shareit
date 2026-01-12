@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,7 @@ import ru.practicum.shareit.booking.service.BookingState;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.WrongRequestException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,10 +33,7 @@ class BookingServiceImplIntegrationTest {
     private BookingServiceImpl bookingService;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private ItemRepository itemRepository;
+    private EntityManager entityManager;
 
     private User owner;
     private User booker;
@@ -49,26 +45,28 @@ class BookingServiceImplIntegrationTest {
         owner = new User();
         owner.setName("Owner");
         owner.setEmail("owner@example.com");
-        owner = userRepository.save(owner);
+        entityManager.persist(owner);
 
         booker = new User();
         booker.setName("Booker");
         booker.setEmail("booker@example.com");
-        booker = userRepository.save(booker);
+        entityManager.persist(booker);
 
         item = new Item();
         item.setName("Drill");
         item.setDescription("Powerful drill");
         item.setAvailable(true);
         item.setOwnerId(owner.getId());
-        item = itemRepository.save(item);
+        entityManager.persist(item);
 
         unavailableItem = new Item();
         unavailableItem.setName("Broken Drill");
         unavailableItem.setDescription("Not working");
         unavailableItem.setAvailable(false);
         unavailableItem.setOwnerId(owner.getId());
-        unavailableItem = itemRepository.save(unavailableItem);
+        entityManager.persist(unavailableItem);
+
+        entityManager.flush();
     }
 
     @Test
@@ -139,11 +137,11 @@ class BookingServiceImplIntegrationTest {
         User anotherUser = new User();
         anotherUser.setName("Another");
         anotherUser.setEmail("another@example.com");
-        anotherUser = userRepository.save(anotherUser);
+        entityManager.persist(anotherUser);
+        entityManager.flush();
 
-        User finalAnotherUser = anotherUser;
         WrongRequestException exception = assertThrows(WrongRequestException.class,
-                () -> bookingService.approveBooking(finalAnotherUser.getId(), booking.getId(), true));
+                () -> bookingService.approveBooking(anotherUser.getId(), booking.getId(), true));
         assertEquals("Пользователь не является собственником и не может подтверждать бронь", exception.getMessage());
     }
 
@@ -173,11 +171,11 @@ class BookingServiceImplIntegrationTest {
         User stranger = new User();
         stranger.setName("Stranger");
         stranger.setEmail("stranger@example.com");
-        stranger = userRepository.save(stranger);
+        entityManager.persist(stranger);
+        entityManager.flush();
 
-        User finalStranger = stranger;
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> bookingService.getBookingById(finalStranger.getId(), booking.getId()));
+                () -> bookingService.getBookingById(stranger.getId(), booking.getId()));
         assertEquals("У пользователя нет прав доступа к информации о бронировании.", exception.getMessage());
     }
 
@@ -194,7 +192,8 @@ class BookingServiceImplIntegrationTest {
         item2.setDescription("Heavy hammer");
         item2.setAvailable(true);
         item2.setOwnerId(owner.getId());
-        item2 = itemRepository.save(item2);
+        entityManager.persist(item2);
+        entityManager.flush();
 
         BookingRequestDto requestDto2 = new BookingRequestDto();
         requestDto2.setItemId(item2.getId());

@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking;
 
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -10,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
+import ru.practicum.shareit.exceptions.UnknownStateException;
 
 
 @Controller
@@ -23,29 +26,29 @@ public class BookingController {
     @GetMapping
     public ResponseEntity<Object> getBookings(@RequestHeader("X-Sharer-User-Id") long userId,
                                               @RequestParam(name = "state", defaultValue = "all") String stateParam,
-                                              @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                              @RequestParam(name = "size", defaultValue = "10") Integer size) {
-        try {
-            BookingState state = BookingState.valueOf(stateParam.toUpperCase());
-            log.info("Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
-            return bookingClient.getBookings(userId, state, from, size);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Unknown state: " + stateParam);
-        }
+                                              @RequestParam(name = "from", defaultValue = "0") @PositiveOrZero Integer from,
+                                              @RequestParam(name = "size", defaultValue = "10") @Positive Integer size) {
+
+        BookingState state = BookingState.from(stateParam.toUpperCase())
+                .orElseThrow(() -> new UnknownStateException("Unknown state: " + stateParam));
+
+        log.info("Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
+        return bookingClient.getBookings(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     public ResponseEntity<Object> getOwnerBookings(@RequestHeader("X-Sharer-User-Id") long userId,
                                                    @RequestParam(name = "state", defaultValue = "all") String stateParam,
-                                                   @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                   @RequestParam(name = "size", defaultValue = "10") Integer size) {
-        try {
-            BookingState state = BookingState.valueOf(stateParam.toUpperCase());
-            log.info("Get owner bookings with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
-            return bookingClient.getOwnerBookings(userId, state, from, size);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Unknown state: " + stateParam);
-        }
+                                                   @RequestParam(name = "from", defaultValue = "0") @PositiveOrZero Integer from,
+                                                   @RequestParam(name = "size", defaultValue = "10") @Positive Integer size) {
+
+        BookingState state = BookingState.from(stateParam.toUpperCase())
+                .orElseThrow(() -> new UnknownStateException("Unknown state: " + stateParam));
+
+        log.info("Get owner bookings with state {}, userId={}, from={}, size={}",
+                stateParam, userId, from, size);
+
+        return bookingClient.getOwnerBookings(userId, state, from, size);
     }
 
     @PostMapping

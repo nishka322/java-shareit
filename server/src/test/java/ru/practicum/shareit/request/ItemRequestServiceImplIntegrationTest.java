@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,6 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 
@@ -25,29 +25,29 @@ class ItemRequestServiceImplIntegrationTest {
     private ItemRequestServiceImpl itemRequestService;
 
     @Autowired
-    private ItemRequestRepository itemRequestRepository;
+    private EntityManager entityManager;
 
     @Autowired
-    private UserRepository userRepository;
+    private ItemRequestRepository itemRequestRepository;
 
     private User requestor;
     private User otherUser;
 
     @BeforeEach
     void setUp() {
-        requestor = userRepository.save(
-                User.builder()
-                        .name("Requestor")
-                        .email("requestor@email.com")
-                        .build()
-        );
+        requestor = User.builder()
+                .name("Requestor")
+                .email("requestor@email.com")
+                .build();
+        entityManager.persist(requestor);
 
-        otherUser = userRepository.save(
-                User.builder()
-                        .name("Other User")
-                        .email("other@email.com")
-                        .build()
-        );
+        otherUser = User.builder()
+                .name("Other User")
+                .email("other@email.com")
+                .build();
+        entityManager.persist(otherUser);
+
+        entityManager.flush();
     }
 
     @Test

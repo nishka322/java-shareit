@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.AlreadyExistsException;
@@ -15,15 +16,11 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService implements BaseUserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-
-    public UserService(UserRepository dbUserRepository, UserMapper userMapper) {
-        this.userRepository = dbUserRepository;
-        this.userMapper = userMapper;
-    }
 
     @Override
     public UserDto createUser(UserDto userDto) {

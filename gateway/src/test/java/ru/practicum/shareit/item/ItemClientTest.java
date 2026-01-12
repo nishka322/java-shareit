@@ -11,6 +11,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.comment.NewCommentDto;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -215,7 +216,7 @@ class ItemClientTest {
     void shouldAddComment() {
         long userId = 1L;
         long itemId = 100L;
-        Object commentDto = "Test comment";
+        NewCommentDto commentDto = new NewCommentDto("Test comment");
 
         ResponseEntity<Object> expectedResponse = ResponseEntity.ok().build();
 

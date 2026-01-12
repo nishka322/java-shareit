@@ -1,5 +1,6 @@
 package ru.practicum.shareit.exceptions;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -45,5 +47,23 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ErrorResponse handleIllegalArgument(final IllegalArgumentException e) {
         return new ErrorResponse("Wrong request data.", e.getMessage());
+    }
+
+    @ExceptionHandler(UnknownStateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorResponse handleUnknownState(final UnknownStateException e) {
+        return new ErrorResponse("Unknown state", e.getMessage());
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorResponse handleConstraintViolation(final ConstraintViolationException e) {
+        String message = e.getConstraintViolations().stream()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .collect(Collectors.joining(", "));
+
+        return new ErrorResponse("Validation error", message);
     }
 }

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ class UserServiceIntegrationTest {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Autowired
     private UserRepository userRepository;
@@ -46,91 +50,97 @@ class UserServiceIntegrationTest {
 
     @Test
     void shouldUpdateExistingUser() {
-        UserDto initialUser = UserDto.builder()
+        User user = User.builder()
                 .name("Initial Name")
                 .email("initial@example.com")
                 .build();
-        UserDto created = userService.createUser(initialUser);
+        entityManager.persist(user);
+        entityManager.flush();
 
         UserDto updates = UserDto.builder()
                 .name("Updated Name")
                 .email("updated@example.com")
                 .build();
 
-        UserDto updatedUser = userService.updateUser(created.getId(), updates);
+        UserDto updatedUser = userService.updateUser(user.getId(), updates);
 
-        assertEquals(created.getId(), updatedUser.getId());
+        assertEquals(user.getId(), updatedUser.getId());
         assertEquals("Updated Name", updatedUser.getName());
         assertEquals("updated@example.com", updatedUser.getEmail());
     }
 
     @Test
     void shouldUpdateOnlyNameWhenEmailNotProvided() {
-        UserDto initialUser = UserDto.builder()
+        User user = User.builder()
                 .name("Initial Name")
                 .email("initial@example.com")
                 .build();
-        UserDto created = userService.createUser(initialUser);
+        entityManager.persist(user);
+        entityManager.flush();
 
         UserDto updates = UserDto.builder()
                 .name("Updated Name Only")
                 .build();
 
-        UserDto updatedUser = userService.updateUser(created.getId(), updates);
+        UserDto updatedUser = userService.updateUser(user.getId(), updates);
 
-        assertEquals(created.getId(), updatedUser.getId());
+        assertEquals(user.getId(), updatedUser.getId());
         assertEquals("Updated Name Only", updatedUser.getName());
         assertEquals("initial@example.com", updatedUser.getEmail());
     }
 
     @Test
     void shouldUpdateOnlyEmailWhenNameNotProvided() {
-        UserDto initialUser = UserDto.builder()
+        User user = User.builder()
                 .name("Initial Name")
                 .email("initial@example.com")
                 .build();
-        UserDto created = userService.createUser(initialUser);
+        entityManager.persist(user);
+        entityManager.flush();
 
         UserDto updates = UserDto.builder()
                 .email("newemail@example.com")
                 .build();
 
-        UserDto updatedUser = userService.updateUser(created.getId(), updates);
+        UserDto updatedUser = userService.updateUser(user.getId(), updates);
 
-        assertEquals(created.getId(), updatedUser.getId());
+        assertEquals(user.getId(), updatedUser.getId());
         assertEquals("Initial Name", updatedUser.getName());
         assertEquals("newemail@example.com", updatedUser.getEmail());
     }
 
     @Test
     void shouldGetUserById() {
-        UserDto userDto = UserDto.builder()
+        User user = User.builder()
                 .name("Test User")
                 .email("test@example.com")
                 .build();
-        UserDto createdUser = userService.createUser(userDto);
+        entityManager.persist(user);
+        entityManager.flush();
 
-        UserDto foundUser = userService.getUserById(createdUser.getId());
+        UserDto foundUser = userService.getUserById(user.getId());
 
         assertNotNull(foundUser);
-        assertEquals(createdUser.getId(), foundUser.getId());
-        assertEquals(createdUser.getName(), foundUser.getName());
-        assertEquals(createdUser.getEmail(), foundUser.getEmail());
+        assertEquals(user.getId(), foundUser.getId());
+        assertEquals(user.getName(), foundUser.getName());
+        assertEquals(user.getEmail(), foundUser.getEmail());
     }
 
     @Test
     void shouldGetAllUsers() {
-        UserDto user1 = UserDto.builder()
+        User user1 = User.builder()
                 .name("User 1")
                 .email("user1@example.com")
                 .build();
-        UserDto user2 = UserDto.builder()
+        entityManager.persist(user1);
+
+        User user2 = User.builder()
                 .name("User 2")
                 .email("user2@example.com")
                 .build();
+        entityManager.persist(user2);
 
-        userService.createUser(user1);
-        userService.createUser(user2);
+        entityManager.flush();
 
         List<UserDto> allUsers = userService.getAllUsers();
 
@@ -142,26 +152,28 @@ class UserServiceIntegrationTest {
 
     @Test
     void shouldDeleteUser() {
-        UserDto userDto = UserDto.builder()
+        User user = User.builder()
                 .name("To Delete")
                 .email("delete@example.com")
                 .build();
-        UserDto createdUser = userService.createUser(userDto);
+        entityManager.persist(user);
+        entityManager.flush();
 
-        assertTrue(userRepository.findById(createdUser.getId()).isPresent());
+        assertTrue(userRepository.findById(user.getId()).isPresent());
 
-        userService.deleteUser(createdUser.getId());
+        userService.deleteUser(user.getId());
 
-        assertFalse(userRepository.findById(createdUser.getId()).isPresent());
+        assertFalse(userRepository.findById(user.getId()).isPresent());
     }
 
     @Test
     void shouldThrowExceptionWhenCreatingUserWithExistingEmail() {
-        UserDto user1 = UserDto.builder()
+        User existingUser = User.builder()
                 .name("User 1")
                 .email("same@example.com")
                 .build();
-        userService.createUser(user1);
+        entityManager.persist(existingUser);
+        entityManager.flush();
 
         UserDto user2 = UserDto.builder()
                 .name("User 2")
@@ -173,40 +185,43 @@ class UserServiceIntegrationTest {
 
     @Test
     void shouldThrowExceptionWhenUpdatingEmailToExistingEmail() {
-        UserDto user1 = UserDto.builder()
+        User user1 = User.builder()
                 .name("User 1")
                 .email("user1@example.com")
                 .build();
-        UserDto user2 = UserDto.builder()
+        entityManager.persist(user1);
+
+        User user2 = User.builder()
                 .name("User 2")
                 .email("user2@example.com")
                 .build();
+        entityManager.persist(user2);
 
-        UserDto createdUser1 = userService.createUser(user1);
-        userService.createUser(user2);
+        entityManager.flush();
 
         UserDto updates = UserDto.builder()
                 .email("user2@example.com")
                 .build();
 
         assertThrows(AlreadyExistsException.class,
-                () -> userService.updateUser(createdUser1.getId(), updates));
+                () -> userService.updateUser(user1.getId(), updates));
     }
 
     @Test
     void shouldUpdateEmailToSameEmail() {
-        UserDto userDto = UserDto.builder()
+        User user = User.builder()
                 .name("Test User")
                 .email("test@example.com")
                 .build();
-        UserDto createdUser = userService.createUser(userDto);
+        entityManager.persist(user);
+        entityManager.flush();
 
         UserDto updates = UserDto.builder()
                 .email("test@example.com")
                 .name("Updated Name")
                 .build();
 
-        UserDto updatedUser = userService.updateUser(createdUser.getId(), updates);
+        UserDto updatedUser = userService.updateUser(user.getId(), updates);
 
         assertEquals("test@example.com", updatedUser.getEmail());
         assertEquals("Updated Name", updatedUser.getName());

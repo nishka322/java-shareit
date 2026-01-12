@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.comment.NewCommentDto;
 
 @Slf4j
 @RestController
@@ -55,7 +56,7 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<Object> addComment(@RequestHeader("X-Sharer-User-Id") Long userId,
                                              @PathVariable Long itemId,
-                                             @Valid @RequestBody Object commentDto) {
+                                             @Valid @RequestBody NewCommentDto commentDto) {
         log.info("Adding comment to item {} by user {}", itemId, userId);
         return itemClient.addComment(userId, itemId, commentDto);
     }

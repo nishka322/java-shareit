@@ -12,13 +12,6 @@ import java.util.Objects;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public ErrorResponse handleValidation(final MethodArgumentNotValidException e) {
-        return new ErrorResponse("Not valid.", Objects.requireNonNull(e.getFieldError()).getDefaultMessage());
-    }
-
     @ExceptionHandler(AlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     @ResponseBody

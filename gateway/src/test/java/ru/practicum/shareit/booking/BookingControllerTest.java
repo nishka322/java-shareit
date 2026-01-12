@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
+import ru.practicum.shareit.exceptions.UnknownStateException;
 
 import java.time.LocalDateTime;
 
@@ -71,7 +72,7 @@ class BookingControllerTest {
 
     @Test
     void shouldThrowExceptionForInvalidState() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(UnknownStateException.class, () -> {
             bookingController.getBookings(1L, "INVALID_STATE", 0, 10);
         });
     }

@@ -4,15 +4,31 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import ru.practicum.shareit.exceptions.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
 
     @InjectMocks
     private GlobalExceptionHandler exceptionHandler;
+
+    @Test
+    void handleValidation() {
+        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
+        FieldError fieldError = new FieldError("object", "field", "defaultMessage");
+        when(ex.getFieldError()).thenReturn(fieldError);
+
+        ErrorResponse response = exceptionHandler.handleValidation(ex);
+
+        assertThat(response.getError()).isEqualTo("Not valid.");
+        assertThat(response.getDescription()).isEqualTo("defaultMessage");
+    }
 
     @Test
     void handleAlreadyExists() {

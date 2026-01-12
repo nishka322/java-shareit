@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
@@ -44,60 +46,36 @@ public class ItemServiceImpl implements ItemService {
     private final BookingMapper bookingMapper;
     private final ItemRequestRepository itemRequestRepository;
 
-    public ItemServiceImpl(ItemRepository itemRepository,
-                           UserService userService,
-                           ItemMapper itemMapper,
-                           UserMapper userMapper,
-                           CommentMapper commentMapper,
-                           CommentRepository commentRepository,
-                           BookingRepository bookingRepository,
-                           BookingMapper bookingMapper,
-                           ItemRequestRepository itemRequestRepository) {
-        this.itemRepository = itemRepository;
-        this.userService = userService;
-        this.itemMapper = itemMapper;
-        this.userMapper = userMapper;
-        this.commentMapper = commentMapper;
-        this.commentRepository = commentRepository;
-        this.bookingRepository = bookingRepository;
-        this.bookingMapper = bookingMapper;
-        this.itemRequestRepository = itemRequestRepository;
-    }
-
     @Override
     @Transactional
     public ItemDto createItem(long userId, ItemDto itemDto) {
         log.debug("Creating item for user {}, DTO: {}", userId, itemDto);
-        try {
-            userService.getUserById(userId);
-            log.debug("User exists");
 
-            Item item = itemMapper.mapToItem(itemDto);
-            log.debug("Mapped to item: {}", item);
+        userService.getUserById(userId);
+        log.debug("User exists");
 
-            item.setOwnerId(userId);
-            log.debug("Set ownerId: {}", userId);
+        Item item = itemMapper.mapToItem(itemDto);
+        log.debug("Mapped to item: {}", item);
 
-            if (itemDto.getRequestId() != null) {
-                log.debug("Processing requestId: {}", itemDto.getRequestId());
-                ItemRequest request = itemRequestRepository.findById(itemDto.getRequestId())
-                        .orElseThrow(() -> new NotFoundException(
-                                "Запрос с id " + itemDto.getRequestId() + " не найден"));
-                item.setRequest(request);
-                log.debug("Set request: {}", request);
-            }
+        item.setOwnerId(userId);
+        log.debug("Set ownerId: {}", userId);
 
-            Item savedItem = itemRepository.save(item);
-            log.debug("Saved item with id: {}", savedItem.getId());
-
-            ItemDto result = itemMapper.mapToDto(savedItem);
-            log.debug("Returning DTO: {}", result);
-
-            return result;
-        } catch (Exception e) {
-            log.error("Error creating item: ", e);
-            throw e;
+        if (itemDto.getRequestId() != null) {
+            log.debug("Processing requestId: {}", itemDto.getRequestId());
+            ItemRequest request = itemRequestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new NotFoundException(
+                            "Запрос с id " + itemDto.getRequestId() + " не найден"));
+            item.setRequest(request);
+            log.debug("Set request: {}", request);
         }
+
+        Item savedItem = itemRepository.save(item);
+        log.debug("Saved item with id: {}", savedItem.getId());
+
+        ItemDto result = itemMapper.mapToDto(savedItem);
+        log.debug("Returning DTO: {}", result);
+
+        return result;
     }
 
     @Override
